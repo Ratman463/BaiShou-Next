@@ -1,5 +1,3 @@
-import { drizzle } from 'drizzle-orm/expo-sqlite'
-// WE MUST explicitly export to avoid connection.manager triggering better-sqlite3
 export * from './schema/summaries'
 export * from './schema/agent-sessions'
 export * from './schema/agent-messages'
@@ -9,6 +7,7 @@ export * from './schema/compression-snapshots'
 export * from './schema/vectors'
 export * from './schema/system-settings'
 export * from './schema/shadow-index'
+export * from './schema/migration-table'
 
 export * from './repositories/diary.repository'
 export * from './repositories/agent.repository'
@@ -26,20 +25,6 @@ export * from './repositories/summary.repository'
 export * from './repositories/summary.repository.impl'
 
 export * from './drivers/vec-capability'
-
-import { AppDatabase } from './types'
-import { ExpoSqliteDriver, ExpoSqliteDatabase } from './drivers/expo-sqlite.driver'
-
-// 特别为 Expo 环境提供的原生依赖解耦
-export function initExpoDatabase(expoDb: ExpoSqliteDatabase): {
-  drizzleDb: AppDatabase
-  driver: ExpoSqliteDriver
-} {
-  // 注入 drizzle 适配器
-  // For Expo, we don't pass the schema object because Drizzle handles queries generically,
-  // but if needed we can combain schemas.
-  const drizzleDb = drizzle(expoDb as any) as unknown as AppDatabase
-  const driver = new ExpoSqliteDriver(expoDb)
-
-  return { drizzleDb, driver }
-}
+export * from './migration.service'
+export * from './raw-sql.executor'
+export * from './types'
