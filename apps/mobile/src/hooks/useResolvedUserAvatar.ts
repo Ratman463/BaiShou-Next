@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useBaishou } from '../providers/BaishouProvider'
-import { resolveAssistantAvatarForMobileUi } from '../lib/assistant-avatar-display.util'
+import { resolveUserAvatarForMobileUi } from '../lib/user-avatar-display.util'
 
-/** 将 settings 中的伙伴头像路径解析为可展示的本地 URI */
-export function useResolvedAssistantAvatar(avatarPath?: string | null): string | null {
+/** 将 settings 中的用户头像路径解析为可展示的本地 URI */
+export function useResolvedUserAvatar(avatarPath?: string | null): string | null {
   const { services, dbReady, vaultRevision } = useBaishou()
   const [uri, setUri] = useState<string | null>(null)
 
@@ -12,7 +12,7 @@ export function useResolvedAssistantAvatar(avatarPath?: string | null): string |
     if (!avatarPath || !dbReady || !services) return
 
     let cancelled = false
-    void resolveAssistantAvatarForMobileUi(
+    void resolveUserAvatarForMobileUi(
       avatarPath,
       services.attachmentManager,
       services.fileSystem
