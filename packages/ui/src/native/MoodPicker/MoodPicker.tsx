@@ -10,48 +10,42 @@ import {
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { MaterialIcons } from '@expo/vector-icons'
-import { WEATHER_IDS, weatherI18nKey, normalizeWeatherId, type WeatherId } from '@baishou/shared'
+import {
+  MOOD_IDS,
+  getMoodLabelFallback,
+  moodI18nKey,
+  normalizeMoodId,
+  type MoodId
+} from '@baishou/shared'
 import { useNativeTheme } from '../theme'
-import { WeatherEmoji } from '../WeatherIcon'
+import { MoodEmoji } from '../MoodIcon/MoodEmoji'
 
-export interface NativeWeatherPickerProps {
+export interface NativeMoodPickerProps {
   value: string
   onChange: (value: string) => void
-}
-
-const weatherLabelFallback: Record<WeatherId, string> = {
-  sunny: '晴',
-  cloudy: '多云',
-  overcast: '阴',
-  light_rain: '小雨',
-  heavy_rain: '大雨',
-  snow: '雪',
-  fog: '雾',
-  windy: '风'
 }
 
 const TRIGGER_HEIGHT = 38
 const ICON_SIZE = 18
 
-export const WeatherPicker: React.FC<NativeWeatherPickerProps> = ({ value, onChange }) => {
+export const MoodPicker: React.FC<NativeMoodPickerProps> = ({ value, onChange }) => {
   const { t } = useTranslation()
   const { colors, tokens } = useNativeTheme()
   const { width: screenWidth } = useWindowDimensions()
   const [open, setOpen] = useState(false)
 
-  const selectedId = normalizeWeatherId(value)
-  const isKnownWeather =
-    selectedId !== '' && (WEATHER_IDS as readonly string[]).includes(selectedId)
-  const displayLabel = isKnownWeather
+  const selectedId = normalizeMoodId(value)
+  const isKnownMood = selectedId && (MOOD_IDS as readonly string[]).includes(selectedId)
+  const displayLabel = isKnownMood
     ? t(
-        `diary.weather.${weatherI18nKey(selectedId as WeatherId)}`,
-        weatherLabelFallback[selectedId as WeatherId]
+        `diary.mood.${moodI18nKey(selectedId as MoodId)}`,
+        getMoodLabelFallback(selectedId as MoodId)
       )
-    : t('diary.weather.default')
+    : t('diary.mood.default', '心情')
 
   const close = useCallback(() => setOpen(false), [])
 
-  const handleSelect = (id: WeatherId | '') => {
+  const handleSelect = (id: MoodId | '') => {
     onChange(id)
     close()
   }
@@ -67,7 +61,7 @@ export const WeatherPicker: React.FC<NativeWeatherPickerProps> = ({ value, onCha
           {
             opacity: pressed ? 0.9 : 1,
             backgroundColor: colors.bgSurface,
-            borderColor: open || selectedId ? colors.primary : colors.borderSubtle,
+            borderColor: open || isKnownMood ? colors.primary : colors.borderSubtle,
             shadowColor: open ? colors.primary : 'transparent',
             ...(open
               ? {
@@ -82,11 +76,11 @@ export const WeatherPicker: React.FC<NativeWeatherPickerProps> = ({ value, onCha
         ]}
       >
         <View style={styles.triggerContent}>
-          {isKnownWeather ? <WeatherEmoji weather={selectedId} size={ICON_SIZE} /> : null}
+          {isKnownMood ? <MoodEmoji mood={selectedId} size={ICON_SIZE} /> : null}
           <Text
             style={[
               styles.triggerLabel,
-              { color: isKnownWeather ? colors.textPrimary : colors.textSecondary }
+              { color: isKnownMood ? colors.textPrimary : colors.textSecondary }
             ]}
             numberOfLines={1}
           >
@@ -114,9 +108,9 @@ export const WeatherPicker: React.FC<NativeWeatherPickerProps> = ({ value, onCha
             ]}
           >
             <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-              {WEATHER_IDS.map((id) => {
+              {MOOD_IDS.map((id) => {
                 const active = selectedId === id
-                const label = t(`diary.weather.${weatherI18nKey(id)}`, weatherLabelFallback[id])
+                const label = t(`diary.mood.${moodI18nKey(id)}`, getMoodLabelFallback(id))
                 return (
                   <Pressable
                     key={id}
@@ -131,7 +125,7 @@ export const WeatherPicker: React.FC<NativeWeatherPickerProps> = ({ value, onCha
                     accessibilityLabel={label}
                     accessibilityState={{ selected: active }}
                   >
-                    <WeatherEmoji weather={id} size={ICON_SIZE} />
+                    <MoodEmoji mood={id} size={ICON_SIZE} />
                     <Text
                       style={[
                         styles.optionLabel,
@@ -184,7 +178,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    flexShrink: 1
+    flexShrink: 1,
+    minWidth: 0
   },
   triggerLabel: {
     fontSize: 13,

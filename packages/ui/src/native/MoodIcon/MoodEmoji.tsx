@@ -7,28 +7,25 @@ import {
   type TextStyle,
   type ImageStyle
 } from 'react-native'
-import { getWeatherEmoji, resolveWeatherId, type WeatherId } from '@baishou/shared'
-import { getWeatherFluentImageSource } from './weather-assets'
+import { getMoodEmoji, normalizeMoodId, MOOD_IDS } from '@baishou/shared'
+import { getMoodFluentImageSource } from './mood-assets'
 
-export interface WeatherEmojiProps {
-  weather: string
+export interface MoodEmojiProps {
+  mood: string
   size?: number
   style?: StyleProp<ImageStyle | TextStyle>
   textStyle?: StyleProp<TextStyle>
 }
 
-/** Fluent Emoji 3D 离线图标，未知天气回退系统 emoji */
-export const WeatherEmoji: React.FC<WeatherEmojiProps> = ({
-  weather,
-  size = 20,
-  style,
-  textStyle
-}) => {
-  const id = resolveWeatherId(weather)
-  if (!id) return null
+/** Fluent Emoji 3D 离线图标，未知心情回退系统 emoji */
+export const MoodEmoji: React.FC<MoodEmojiProps> = ({ mood, size = 18, style, textStyle }) => {
+  const id = normalizeMoodId(mood)
+  const source = getMoodFluentImageSource(id)
+  const fallback = getMoodEmoji(id)
 
-  const source = getWeatherFluentImageSource(id)
-  const fallback = getWeatherEmoji(id)
+  if (!id || !(MOOD_IDS as readonly string[]).includes(id)) {
+    return null
+  }
 
   if (!source) {
     return (
@@ -53,10 +50,6 @@ export const WeatherEmoji: React.FC<WeatherEmojiProps> = ({
       accessibilityIgnoresInvertColors
     />
   )
-}
-
-export function isKnownWeatherId(weather: string): weather is WeatherId {
-  return resolveWeatherId(weather) != null
 }
 
 const styles = StyleSheet.create({
